@@ -35,6 +35,50 @@
     /* ═══════════════════════════════════════════
        ROOT VARIABLES
     ═══════════════════════════════════════════ */
+    /* ═══ CSS BACKGROUND STARS ═════════════════════════════════════ */
+    .star-field {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 1;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .star {
+      position: absolute;
+      background: #E8C46A;
+      border-radius: 50%;
+      animation: fall linear infinite;
+    }
+    @keyframes fall {
+      0% { transform: translateY(-30px) translateX(0); opacity: 0; }
+      8% { opacity: 1; }
+      92% { opacity: 0.8; }
+      100% { transform: translateY(105vh) translateX(15px); opacity: 0; }
+    }
+    .grid-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 1;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(198,151,63,0.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(198,151,63,0.07) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+    .scan-lines {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 1;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        0deg, transparent, transparent 3px,
+        rgba(198,151,63,0.012) 3px, rgba(198,151,63,0.012) 4px
+      );
+    }
+
     :root {
       --navy: #07101E;
       --navy2: #0D1A2E;
@@ -78,9 +122,9 @@
       position: fixed;
       top: 0; left: 0;
       width: 100%; height: 100%;
-      z-index: 0;
+      z-index: 1;
       pointer-events: none;
-      opacity: 0.35;
+      opacity: 1;
     }
 
     /* ═══════════════════════════════════════════
@@ -197,12 +241,14 @@
       overflow: hidden;
       border: 1px solid var(--glass-border);
       background: var(--navy2);
-      aspect-ratio: 16 / 9;
+      aspect-ratio: 9 / 16;
       position: relative;
       margin-bottom: 48px;
       box-shadow: 0 0 60px rgba(198,151,63,0.12);
       opacity: 0;
       animation: fadeUp 0.9s 0.8s forwards;
+      max-height: 600px;
+      max-width: 340px;
     }
 
     .video-wrapper iframe,
@@ -1040,13 +1086,17 @@
     }
 
     .reveal {
-      opacity: 0;
-      transform: translateY(30px);
-      transition: opacity 0.7s ease, transform 0.7s ease;
-    }
-    .reveal.visible {
       opacity: 1;
       transform: translateY(0);
+      transition: opacity 0.65s ease, transform 0.65s ease;
+    }
+    /* Scroll entrance — only used if JS observer works */
+    .reveal.entrance {
+      animation: revealIn 0.65s ease forwards;
+    }
+    @keyframes revealIn {
+      from { opacity: 0.4; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     /* ═══════════════════════════════════════════
@@ -1058,7 +1108,7 @@
       position: fixed;
       top: 0; left: 0;
       width: 100%; height: 100%;
-      background: radial-gradient(circle at 50% 50%, transparent 0%, rgba(7,16,30,0.45) 100%);
+      background: radial-gradient(circle at 50% 50%, transparent 0%, rgba(7,16,30,0.15) 100%);
       pointer-events: none;
       z-index: 0;
     }
@@ -1204,8 +1254,11 @@
 </head>
 <body>
 
-<!-- ═══ ANIMATED BACKGROUND CANVAS ═══ -->
+<!-- ═══ BACKGROUND EFFECTS ═══ -->
 <canvas id="bg-canvas"></canvas>
+<div class="grid-overlay"></div>
+<div class="scan-lines"></div>
+<div class="star-field" id="star-field"></div>
 
 <!-- ═══ PROFIT POPUP ═══ -->
 <div class="profit-popup" id="profit-popup">
@@ -1268,18 +1321,14 @@
 
     <!-- VIDEO -->
     <div class="video-wrapper">
-      <!--
-        REPLACE THIS PLACEHOLDER with your actual video.
-        Options:
-        A) YouTube embed:
-           <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID?autoplay=0" allowfullscreen></iframe>
-        B) Hosted video file:
-           <video src="aham-welcome.mp4" controls poster="thumbnail.jpg"></video>
-      -->
-      <div class="video-placeholder">
-        <div class="play-icon">▶</div>
-        <p>Welcome from Aham — Watch before joining</p>
-      </div>
+      <iframe
+        src="https://www.youtube.com/embed/tRBoxNJNZc4?rel=0&modestbranding=1&autoplay=0&color=white&iv_load_policy=3"
+        title="Welcome from Aham — Phantom AI"
+        frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen
+        style="width:100%;height:100%;position:absolute;top:0;left:0;">
+      </iframe>
     </div>
 
     <!-- CTA -->
@@ -1403,22 +1452,78 @@
       </div>
 
       <div class="story-aside reveal">
-        <div class="aside-card">
-          <div class="big-num">9</div>
-          <div class="label">Years in banking before discovering forex</div>
+
+        <!-- Aham photo card -->
+        <div class="aside-card" style="padding:0;overflow:hidden;">
+          <div style="
+            background: linear-gradient(180deg, var(--navy2) 0%, var(--navy) 100%);
+            padding: 20px 20px 0;
+            display: flex; align-items: center; gap: 14px;
+          ">
+            <img src="https://phantomai.eu/wp-content/uploads/2024/05/k4fnk4f-1024x1002.png"
+                 alt="Aham"
+                 onerror="this.style.display='none'"
+                 style="width:60px;height:60px;border-radius:50%;
+                        object-fit:cover;border:2px solid var(--gold);"/>
+            <div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;
+                          color:var(--white);line-height:1;">Aham</div>
+              <div style="font-size:11px;color:var(--gold);
+                          font-family:'JetBrains Mono',monospace;">
+                Founder · Learn & Trade Academy
+              </div>
+            </div>
+          </div>
+          <div style="padding:14px 20px 18px;">
+            <div style="font-size:13px;color:var(--muted);line-height:1.6;">
+              9 years in banking. Built an AI that trades 24/7.
+              Over 1,000 students trained worldwide.
+            </div>
+          </div>
         </div>
+
+        <!-- Rachel photo card -->
+        <div class="aside-card" style="padding:0;overflow:hidden;border-color:var(--gold);">
+          <div style="
+            background: linear-gradient(180deg, rgba(198,151,63,0.12) 0%, var(--navy2) 100%);
+            padding: 20px 20px 0;
+            display: flex; align-items: center; gap: 14px;
+          ">
+            <img src="https://phantomai.eu/wp-content/uploads/2024/05/ed-1.png"
+                 alt="Rachel Foko"
+                 onerror="this.style.display='none'"
+                 style="width:60px;height:60px;border-radius:50%;
+                        object-fit:cover;border:2px solid var(--gold);"/>
+            <div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;
+                          color:var(--white);line-height:1;">Rachel Foko</div>
+              <div style="font-size:11px;color:var(--gold);
+                          font-family:'JetBrains Mono',monospace;">
+                Top Student · Sweden
+              </div>
+            </div>
+          </div>
+          <div style="padding:14px 20px 18px;">
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;
+                        color:var(--gold);line-height:1;margin-bottom:4px;">
+              $2,000,000+
+            </div>
+            <div style="font-size:13px;color:var(--muted);line-height:1.6;">
+              Generated using Phantom AI. Started with zero
+              trading experience.
+            </div>
+          </div>
+        </div>
+
         <div class="aside-card">
           <div class="big-num">1,000+</div>
-          <div class="label">Students trained across UK, Sweden, Australia, Canada</div>
-        </div>
-        <div class="aside-card">
-          <div class="big-num">$2M+</div>
-          <div class="label">Generated by community members using Phantom AI</div>
+          <div class="label">Students across UK, Sweden, Australia, Canada</div>
         </div>
         <div class="aside-card">
           <div class="big-num">24/7</div>
-          <div class="label">Hours the AI trades without rest, emotion, or error</div>
+          <div class="label">The AI trades without rest, emotion, or error</div>
         </div>
+
       </div>
     </div>
   </div>
@@ -1605,19 +1710,19 @@
 
       <div class="roi-results">
         <div class="roi-result-card">
-          <div class="tier" id="tier-low">Conservative</div>
+          <div class="tier" id="tier-low">Entry Level</div>
           <div class="amount" id="roi-low">$53</div>
-          <div class="pct" id="pct-low">15% monthly</div>
+          <div class="pct" id="pct-low">15% monthly · Min $350</div>
         </div>
         <div class="roi-result-card">
-          <div class="tier" id="tier-mid">Moderate</div>
+          <div class="tier" id="tier-mid">Growth Level</div>
           <div class="amount" id="roi-mid">$105</div>
-          <div class="pct" id="pct-mid">30% monthly</div>
+          <div class="pct" id="pct-mid">30% monthly · Rec. $700</div>
         </div>
         <div class="roi-result-card">
-          <div class="tier" id="tier-high">High Performance</div>
+          <div class="tier" id="tier-high">Advanced Level</div>
           <div class="amount" id="roi-high">$175</div>
-          <div class="pct" id="pct-high">50% monthly</div>
+          <div class="pct" id="pct-high">50% monthly · Rec. $2,000+</div>
         </div>
       </div>
 
@@ -1783,30 +1888,28 @@
       </p>
     </div>
 
-    <!-- Rating bar -->
+    <!-- Trustpilot badge — logo + stars + rating only, no links -->
     <div class="reveal" style="
-      display:flex;align-items:center;gap:24px;flex-wrap:wrap;
+      display:flex;align-items:center;gap:20px;flex-wrap:wrap;
       margin-top:40px;margin-bottom:32px;
       background:var(--glass);border:1px solid var(--glass-border);
-      border-radius:14px;padding:24px 32px;
+      border-radius:14px;padding:22px 28px;
     ">
-      <svg width="130" height="32" viewBox="0 0 130 32">
-        <text x="0" y="26" font-family="sans-serif" font-size="24" font-weight="700" fill="#00B67A">Trustpilot</text>
-      </svg>
-      <div style="display:flex;gap:3px;align-items:center;">
-        <span style="font-size:30px;color:#00B67A;line-height:1;">★★★★</span>
-        <span style="font-size:30px;color:#00B67A;opacity:0.45;line-height:1;">★</span>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <svg width="24" height="24" viewBox="0 0 22 22" fill="none">
+          <rect width="22" height="22" rx="3" fill="#00B67A"/>
+          <polygon points="11,3 13.5,8.5 19.5,9.2 15,13.5 16.5,19.5 11,16.5 5.5,19.5 7,13.5 2.5,9.2 8.5,8.5" fill="white"/>
+        </svg>
+        <span style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:#00B67A;letter-spacing:0.04em;">Trustpilot</span>
+      </div>
+      <div style="display:flex;gap:2px;align-items:center;">
+        <span style="font-size:28px;color:#00B67A;line-height:1;">★★★★</span>
+        <span style="font-size:28px;color:#00B67A;opacity:0.5;line-height:1;">★</span>
       </div>
       <div>
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:38px;color:#fff;line-height:1;">4.5</div>
-        <div style="font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;letter-spacing:0.1em;">AVG RATING · LEARN &amp; TRADE ACADEMY</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:38px;color:var(--white);line-height:1;">4.5</div>
+        <div style="font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;letter-spacing:0.1em;">VERIFIED MEMBER REVIEWS</div>
       </div>
-      <a href="https://uk.trustpilot.com/review/learnandtrade.academy" target="_blank" rel="noopener"
-         style="margin-left:auto;font-size:13px;color:var(--gold);border:1px solid var(--glass-border);
-                padding:10px 18px;border-radius:8px;font-family:'JetBrains Mono',monospace;white-space:nowrap;
-                text-decoration:none;">
-        Read all reviews →
-      </a>
     </div>
 
     <!-- Official Trustpilot widget -->
@@ -1819,11 +1922,9 @@
       data-theme="dark"
       data-stars="4,5"
       style="margin-bottom:36px;">
-      <a href="https://uk.trustpilot.com/review/learnandtrade.academy" target="_blank" rel="noopener">
-        View on Trustpilot
-      </a>
+      <span></span>
     </div>
-    <script type="text/javascript" src="//widget.trustpilot.com/bootstrap/v5/tp.widget.bootstrap.min.js" async></script>
+    
 
     <!-- Screenshot gallery — auto-scrolling -->
     <div class="reveal">
@@ -1835,46 +1936,26 @@
         scrollbar-width:thin;
         scrollbar-color:var(--gold-dim) transparent;
       ">
-        <a href="https://uk.trustpilot.com/review/learnandtrade.academy" target="_blank" rel="noopener" style="flex-shrink:0;scroll-snap-align:start;">
-          <img src="https://phantomai.eu/wp-content/uploads/2024/05/WhatsApp-Image-2023-09-15-at-10.01.49-PM-2-1.jpeg" alt="Trustpilot review" loading="lazy"
-               style="height:220px;width:auto;border-radius:12px;border:1px solid var(--glass-border);display:block;"/>
-        </a>
-        <a href="https://uk.trustpilot.com/review/learnandtrade.academy" target="_blank" rel="noopener" style="flex-shrink:0;scroll-snap-align:start;">
-          <img src="https://phantomai.eu/wp-content/uploads/2024/05/WhatsApp-Image-2023-09-15-at-10.01.50-PM-5.jpeg" alt="Trustpilot review" loading="lazy"
-               style="height:220px;width:auto;border-radius:12px;border:1px solid var(--glass-border);display:block;"/>
-        </a>
-        <a href="https://uk.trustpilot.com/review/learnandtrade.academy" target="_blank" rel="noopener" style="flex-shrink:0;scroll-snap-align:start;">
-          <img src="https://phantomai.eu/wp-content/uploads/2024/05/WhatsApp-Image-2023-09-15-at-10.01.49-PM-2.jpeg" alt="Trustpilot review" loading="lazy"
-               style="height:220px;width:auto;border-radius:12px;border:1px solid var(--glass-border);display:block;"/>
-        </a>
-        <a href="https://uk.trustpilot.com/review/learnandtrade.academy" target="_blank" rel="noopener" style="flex-shrink:0;scroll-snap-align:start;">
-          <img src="https://phantomai.eu/wp-content/uploads/2024/05/WhatsApp-Image-2023-09-15-at-10.01.50-PM-1.jpeg" alt="Trustpilot review" loading="lazy"
-               style="height:220px;width:auto;border-radius:12px;border:1px solid var(--glass-border);display:block;"/>
-        </a>
-        <a href="https://uk.trustpilot.com/review/learnandtrade.academy" target="_blank" rel="noopener" style="flex-shrink:0;scroll-snap-align:start;">
-          <img src="https://phantomai.eu/wp-content/uploads/2024/05/31.jpg" alt="Trustpilot review" loading="lazy"
-               style="height:220px;width:auto;border-radius:12px;border:1px solid var(--glass-border);display:block;"/>
-        </a>
-        <a href="https://uk.trustpilot.com/review/learnandtrade.academy" target="_blank" rel="noopener" style="flex-shrink:0;scroll-snap-align:start;">
-          <img src="https://phantomai.eu/wp-content/uploads/2024/05/33.jpg" alt="Trustpilot review" loading="lazy"
-               style="height:220px;width:auto;border-radius:12px;border:1px solid var(--glass-border);display:block;"/>
-        </a>
-        <a href="https://uk.trustpilot.com/review/learnandtrade.academy" target="_blank" rel="noopener" style="flex-shrink:0;scroll-snap-align:start;">
-          <img src="https://phantomai.eu/wp-content/uploads/2024/05/WhatsApp-Image-2023-09-15-at-10.01.49-PM-3.jpeg" alt="Trustpilot review" loading="lazy"
-               style="height:220px;width:auto;border-radius:12px;border:1px solid var(--glass-border);display:block;"/>
-        </a>
-        <a href="https://uk.trustpilot.com/review/learnandtrade.academy" target="_blank" rel="noopener" style="flex-shrink:0;scroll-snap-align:start;">
-          <img src="https://phantomai.eu/wp-content/uploads/2024/05/WhatsApp-Image-2023-09-15-at-10.01.49-PM-1.jpeg" alt="Trustpilot review" loading="lazy"
-               style="height:220px;width:auto;border-radius:12px;border:1px solid var(--glass-border);display:block;"/>
-        </a>
-        <a href="https://uk.trustpilot.com/review/learnandtrade.academy" target="_blank" rel="noopener" style="flex-shrink:0;scroll-snap-align:start;">
-          <img src="https://phantomai.eu/wp-content/uploads/2024/05/WhatsApp-Image-2023-09-15-at-10.01.50-PM.jpeg" alt="Trustpilot review" loading="lazy"
-               style="height:220px;width:auto;border-radius:12px;border:1px solid var(--glass-border);display:block;"/>
-        </a>
-        <a href="https://uk.trustpilot.com/review/learnandtrade.academy" target="_blank" rel="noopener" style="flex-shrink:0;scroll-snap-align:start;">
-          <img src="https://phantomai.eu/wp-content/uploads/2024/05/1.jpeg" alt="Trustpilot review" loading="lazy"
-               style="height:220px;width:auto;border-radius:12px;border:1px solid var(--glass-border);display:block;"/>
-        </a>
+        <div style="flex-shrink:0;scroll-snap-align:start;"><img src="https://phantomai.eu/wp-content/uploads/2024/05/WhatsApp-Image-2023-09-15-at-10.01.49-PM-2-1.jpeg" alt="Trustpilot review" loading="lazy"
+               style="height:220px;width:auto;border-radius:12px;border:1px solid var(--glass-border);display:block;"/></div>
+        <div style="flex-shrink:0;scroll-snap-align:start;"><img src="https://phantomai.eu/wp-content/uploads/2024/05/WhatsApp-Image-2023-09-15-at-10.01.50-PM-5.jpeg" alt="Trustpilot review" loading="lazy"
+               style="height:220px;width:auto;border-radius:12px;border:1px solid var(--glass-border);display:block;"/></div>
+        <div style="flex-shrink:0;scroll-snap-align:start;"><img src="https://phantomai.eu/wp-content/uploads/2024/05/WhatsApp-Image-2023-09-15-at-10.01.49-PM-2.jpeg" alt="Trustpilot review" loading="lazy"
+               style="height:220px;width:auto;border-radius:12px;border:1px solid var(--glass-border);display:block;"/></div>
+        <div style="flex-shrink:0;scroll-snap-align:start;"><img src="https://phantomai.eu/wp-content/uploads/2024/05/WhatsApp-Image-2023-09-15-at-10.01.50-PM-1.jpeg" alt="Trustpilot review" loading="lazy"
+               style="height:220px;width:auto;border-radius:12px;border:1px solid var(--glass-border);display:block;"/></div>
+        <div style="flex-shrink:0;scroll-snap-align:start;"><img src="https://phantomai.eu/wp-content/uploads/2024/05/31.jpg" alt="Trustpilot review" loading="lazy"
+               style="height:220px;width:auto;border-radius:12px;border:1px solid var(--glass-border);display:block;"/></div>
+        <div style="flex-shrink:0;scroll-snap-align:start;"><img src="https://phantomai.eu/wp-content/uploads/2024/05/33.jpg" alt="Trustpilot review" loading="lazy"
+               style="height:220px;width:auto;border-radius:12px;border:1px solid var(--glass-border);display:block;"/></div>
+        <div style="flex-shrink:0;scroll-snap-align:start;"><img src="https://phantomai.eu/wp-content/uploads/2024/05/WhatsApp-Image-2023-09-15-at-10.01.49-PM-3.jpeg" alt="Trustpilot review" loading="lazy"
+               style="height:220px;width:auto;border-radius:12px;border:1px solid var(--glass-border);display:block;"/></div>
+        <div style="flex-shrink:0;scroll-snap-align:start;"><img src="https://phantomai.eu/wp-content/uploads/2024/05/WhatsApp-Image-2023-09-15-at-10.01.49-PM-1.jpeg" alt="Trustpilot review" loading="lazy"
+               style="height:220px;width:auto;border-radius:12px;border:1px solid var(--glass-border);display:block;"/></div>
+        <div style="flex-shrink:0;scroll-snap-align:start;"><img src="https://phantomai.eu/wp-content/uploads/2024/05/WhatsApp-Image-2023-09-15-at-10.01.50-PM.jpeg" alt="Trustpilot review" loading="lazy"
+               style="height:220px;width:auto;border-radius:12px;border:1px solid var(--glass-border);display:block;"/></div>
+        <div style="flex-shrink:0;scroll-snap-align:start;"><img src="https://phantomai.eu/wp-content/uploads/2024/05/1.jpeg" alt="Trustpilot review" loading="lazy"
+               style="height:220px;width:auto;border-radius:12px;border:1px solid var(--glass-border);display:block;"/></div>
       </div>
     </div>
 
@@ -1900,12 +1981,7 @@
     </script>
 
     <p style="text-align:center;margin-top:18px;font-size:12px;color:var(--muted);">
-      All reviews independently verified ·
-      <a href="https://uk.trustpilot.com/review/learnandtrade.academy"
-         target="_blank" rel="noopener"
-         style="color:var(--gold);text-decoration:none;">
-        View all on Trustpilot →
-      </a>
+      All reviews independently verified by Trustpilot
     </p>
 
   </div>
@@ -1929,24 +2005,24 @@
         <div class="return-pct">15–20%</div>
         <div class="return-sub">per month</div>
         <div class="return-divider"></div>
-        <div class="return-deposit">Min. $350 deposit</div>
-        <div class="return-desc">Conservative, consistent growth. Ideal for anyone starting out.</div>
+        <div class="return-deposit">Min. $350 · Any amount above $350</div>
+        <div class="return-desc">Conservative, consistent growth. Ideal for anyone starting fresh.</div>
       </div>
       <div class="return-card highlighted">
         <div class="return-tier">Growth Level</div>
         <div class="return-pct">20–40%</div>
         <div class="return-sub">per month</div>
         <div class="return-divider"></div>
-        <div class="return-deposit">Min. $500 deposit</div>
-        <div class="return-desc">Accelerated compounding as your capital builds month to month.</div>
+        <div class="return-deposit">Min. $350 · Recommended $700</div>
+        <div class="return-desc">Accelerated compounding. Recommended deposit $700 for stronger results.</div>
       </div>
       <div class="return-card">
         <div class="return-tier">Advanced Level</div>
         <div class="return-pct">40–60%</div>
         <div class="return-sub">per month</div>
         <div class="return-divider"></div>
-        <div class="return-deposit">$2,000+ deposit</div>
-        <div class="return-desc">Maximum AI performance. For those ready to go serious.</div>
+        <div class="return-deposit">Min. $350 · Recommended $2,000+</div>
+        <div class="return-desc">Maximum AI performance. Recommended $2,000+ for full potential.</div>
       </div>
     </div>
   </div>
@@ -2092,145 +2168,168 @@ function trackLead(source) {
   }).catch(() => {});
 }
 
-/* ─── ANIMATED BACKGROUND CANVAS ─────────────── */
+/* ─── CSS STAR FIELD (primary effect) ─────────── */
+(function() {
+  const field = document.getElementById('star-field');
+  if (!field) return;
+  /* Reduce stars on mobile for performance */
+  const isMobile = window.innerWidth < 768;
+  const count = isMobile ? 60 : 160;
+  for (let i = 0; i < count; i++) {
+    const star = document.createElement('div');
+    star.className = 'star';
+    const size = Math.random() * 5 + 1.5;
+    const left = Math.random() * 100;
+    const delay = Math.random() * 14;
+    const duration = Math.random() * 9 + 5;
+    star.style.cssText =
+      'width:' + size + 'px;' +
+      'height:' + size + 'px;' +
+      'left:' + left + '%;' +
+      'top:-10px;' +
+      'animation-duration:' + duration + 's;' +
+      'animation-delay:-' + delay + 's;' +
+      'box-shadow: 0 0 ' + (size*3) + 'px ' + size + 'px rgba(232,196,106,0.6);';
+    field.appendChild(star);
+  }
+  /* Shooting streaks */
+  const streakCount = isMobile ? 4 : 14;
+  for (let i = 0; i < streakCount; i++) {
+    const streak = document.createElement('div');
+    const left = Math.random() * 100;
+    const delay = Math.random() * 14;
+    const duration = Math.random() * 5 + 3;
+    const h = Math.random() * 80 + 40;
+    streak.style.cssText =
+      'position:absolute;' +
+      'width:1.5px;height:' + h + 'px;' +
+      'left:' + left + '%;top:-100px;' +
+      'background:linear-gradient(180deg,' +
+        'rgba(232,196,106,0),' +
+        'rgba(232,196,106,0.9) 50%,' +
+        'rgba(198,151,63,0));' +
+      'animation:fall ' + duration + 's linear -' + delay + 's infinite;' +
+      'border-radius:1px;' +
+      'box-shadow: 0 0 4px rgba(232,196,106,0.4);';
+    field.appendChild(streak);
+  }
+})();
+
+/* ─── CANVAS (secondary depth effect) ─────────── */
 (function() {
   const canvas = document.getElementById('bg-canvas');
+  if (!canvas) return;
   const ctx = canvas.getContext('2d');
-  let W, H, particles = [], mouse = { x: 0, y: 0 };
+  let W, H;
 
   function resize() {
     W = canvas.width = window.innerWidth;
     H = canvas.height = window.innerHeight;
   }
 
-  window.addEventListener('mousemove', e => {
-    mouse.x = e.clientX;
-    mouse.y = e.clientY;
-  });
-
-  class Particle {
-    constructor() { this.reset(true); }
-    reset(init) {
-      this.x = Math.random() * W;
-      this.y = init ? Math.random() * H : H + 10;
-      this.size = Math.random() * 2.2 + 0.4;
-      this.speed = Math.random() * 0.55 + 0.18;
-      this.op = Math.random() * 0.45 + 0.05;
-      this.drift = (Math.random() - 0.5) * 0.25;
-    }
-    update() {
-      this.y -= this.speed;
-      this.x += this.drift;
-      /* subtle mouse repulsion */
-      const dx = this.x - mouse.x, dy = this.y - mouse.y;
-      const dist = Math.sqrt(dx*dx + dy*dy);
-      if (dist < 80) {
-        this.x += (dx / dist) * 1.2;
-        this.y += (dy / dist) * 1.2;
-      }
-      if (this.y < -4) this.reset(false);
-    }
-    draw() {
-      ctx.fillStyle = `rgba(198,151,63,${this.op})`;
-      ctx.fillRect(this.x, this.y, this.size, this.size);
-    }
-  }
-
-  function initParticles() {
-    particles = [];
-    const count = Math.min(180, Math.floor(W * H / 6000));
-    for (let i = 0; i < count; i++) particles.push(new Particle());
-  }
-
-  function drawGrid() {
-    ctx.strokeStyle = 'rgba(198,151,63,0.04)';
+  function drawFrame() {
+    ctx.clearRect(0, 0, W, H);
+    /* Subtle grid */
+    ctx.strokeStyle = 'rgba(198,151,63,0.08)';
     ctx.lineWidth = 1;
     ctx.beginPath();
-    const step = 55;
-    for (let x = 0; x < W; x += step) { ctx.moveTo(x, 0); ctx.lineTo(x, H); }
-    for (let y = 0; y < H; y += step) { ctx.moveTo(0, y); ctx.lineTo(W, y); }
+    for (let x = 0; x < W; x += 60) {
+      ctx.moveTo(x, 0); ctx.lineTo(x, H);
+    }
+    for (let y = 0; y < H; y += 60) {
+      ctx.moveTo(0, y); ctx.lineTo(W, y);
+    }
     ctx.stroke();
-    /* diagonal accent lines */
-    ctx.strokeStyle = 'rgba(198,151,63,0.025)';
+    /* Diagonal accents */
+    ctx.strokeStyle = 'rgba(198,151,63,0.04)';
     ctx.beginPath();
-    for (let x = -H; x < W + H; x += 110) {
+    for (let x = -H; x < W + H; x += 120) {
       ctx.moveTo(x, 0); ctx.lineTo(x + H, H);
     }
     ctx.stroke();
   }
 
-  function animate() {
-    ctx.clearRect(0, 0, W, H);
-    drawGrid();
-    particles.forEach(p => { p.update(); p.draw(); });
-    requestAnimationFrame(animate);
-  }
-
-  resize(); initParticles(); animate();
-  window.addEventListener('resize', () => { resize(); initParticles(); });
+  resize();
+  drawFrame();
+  window.addEventListener('resize', () => { resize(); drawFrame(); });
 })();
 
-/* ─── SCROLL REVEAL ───────────────────────────── */
-const revealEls = document.querySelectorAll('.reveal');
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach(e => {
-    if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }
+/* ─── ENSURE ALL CONTENT VISIBLE ─────────────── */
+document.addEventListener('DOMContentLoaded', function() {
+  /* Guarantee all content is visible — observer is enhancement only */
+  document.querySelectorAll('.reveal').forEach(function(el) {
+    el.style.opacity = '1';
+    el.style.transform = 'none';
   });
-}, { threshold: 0.12 });
-revealEls.forEach(el => observer.observe(el));
-
-/* ─── ANIMATED COUNTERS ───────────────────────── */
-function animateCounter(el) {
-  const target = parseInt(el.dataset.target);
-  const prefix = el.dataset.prefix || '';
-  const suffix = el.dataset.suffix || '';
-  const duration = 1800;
-  const start = performance.now();
-
-  function update(now) {
-    const progress = Math.min((now - start) / duration, 1);
-    const ease = 1 - Math.pow(1 - progress, 3);
-    const val = Math.floor(ease * target);
-
-    if (target >= 1000000) {
-      el.textContent = prefix + (val / 1000000).toFixed(1) + suffix;
-    } else {
-      el.textContent = prefix + val.toLocaleString() + suffix;
-    }
-
-    if (progress < 1) requestAnimationFrame(update);
+  /* Optional scroll entrance animation */
+  if ('IntersectionObserver' in window) {
+    var obs = new IntersectionObserver(function(entries) {
+      entries.forEach(function(e) {
+        if (e.isIntersecting) {
+          e.target.classList.add('entrance');
+          obs.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.08 });
+    document.querySelectorAll('.reveal').forEach(function(el) {
+      obs.observe(el);
+    });
   }
-  requestAnimationFrame(update);
-}
+});
 
-const counterObs = new IntersectionObserver((entries) => {
-  entries.forEach(e => {
-    if (e.isIntersecting && e.target.dataset.target) {
-      animateCounter(e.target);
-      counterObs.unobserve(e.target);
+
+/* ─── ANIMATED STAT COUNTERS ──────────────────── */
+(function() {
+  function animateCounter(el) {
+    var target = parseInt(el.dataset.target);
+    var prefix = el.dataset.prefix || '';
+    var suffix = el.dataset.suffix || '';
+    var duration = 1800;
+    var start = performance.now();
+    function update(now) {
+      var progress = Math.min((now - start) / duration, 1);
+      var ease = 1 - Math.pow(1 - progress, 3);
+      var val = Math.floor(ease * target);
+      if (target >= 1000000) {
+        el.textContent = prefix + (val/1000000).toFixed(1) + suffix;
+      } else {
+        el.textContent = prefix + val.toLocaleString() + suffix;
+      }
+      if (progress < 1) requestAnimationFrame(update);
     }
+    requestAnimationFrame(update);
+  }
+  var counterObs = new IntersectionObserver(function(entries) {
+    entries.forEach(function(e) {
+      if (e.isIntersecting && e.target.dataset.target) {
+        animateCounter(e.target);
+        counterObs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.5 });
+  document.querySelectorAll('[data-target]').forEach(function(el) {
+    counterObs.observe(el);
   });
-}, { threshold: 0.5 });
-document.querySelectorAll('[data-target]').forEach(el => counterObs.observe(el));
+})();
 
 /* ─── ROI CALCULATOR ──────────────────────────── */
 (function() {
-  const slider = document.getElementById('roi-slider');
-  const display = document.getElementById('slider-display');
-  const roiLow = document.getElementById('roi-low');
-  const roiMid = document.getElementById('roi-mid');
-  const roiHigh = document.getElementById('roi-high');
-  const modeLabel= document.getElementById('roi-mode-label');
-  const breakdown= document.getElementById('compound-breakdown');
-  const compRows = document.getElementById('compound-rows');
+  var slider = document.getElementById('roi-slider');
+  var display = document.getElementById('slider-display');
+  var roiLow = document.getElementById('roi-low');
+  var roiMid = document.getElementById('roi-mid');
+  var roiHigh = document.getElementById('roi-high');
+  var modeLabel = document.getElementById('roi-mode-label');
+  var breakdown = document.getElementById('compound-breakdown');
+  var compRows = document.getElementById('compound-rows');
   if (!slider) return;
 
-  let currentMode = 30; /* 30 = monthly, 6 = 6-month compound */
+  var currentMode = 30;
 
   window.setMode = function(mode) {
     currentMode = mode;
-    const btn30 = document.getElementById('toggle-30');
-    const btn6m = document.getElementById('toggle-6m');
+    var btn30 = document.getElementById('toggle-30');
+    var btn6m = document.getElementById('toggle-6m');
     if (mode === 30) {
       btn30.style.background = 'var(--gold)';
       btn30.style.color = 'var(--navy)';
@@ -2238,8 +2337,8 @@ document.querySelectorAll('[data-target]').forEach(el => counterObs.observe(el))
       btn6m.style.background = 'transparent';
       btn6m.style.color = 'var(--muted)';
       btn6m.style.fontWeight = 'normal';
-      breakdown.style.display = 'none';
-      modeLabel.textContent = '30-DAY PROJECTION';
+      if (breakdown) breakdown.style.display = 'none';
+      if (modeLabel) modeLabel.textContent = '30-DAY PROJECTION';
     } else {
       btn6m.style.background = 'var(--gold)';
       btn6m.style.color = 'var(--navy)';
@@ -2247,84 +2346,84 @@ document.querySelectorAll('[data-target]').forEach(el => counterObs.observe(el))
       btn30.style.background = 'transparent';
       btn30.style.color = 'var(--muted)';
       btn30.style.fontWeight = 'normal';
-      breakdown.style.display = 'block';
-      modeLabel.textContent = '6-MONTH COMPOUNDING PROJECTION';
+      if (breakdown) breakdown.style.display = 'block';
+      if (modeLabel) modeLabel.textContent = '6-MONTH COMPOUNDING PROJECTION';
     }
     updateROI();
   };
 
-  function compound(principal, rate, months) {
-    return principal * Math.pow(1 + rate, months);
-  }
-
   function fmt(n) {
     if (n >= 1000000) return '$' + (n/1000000).toFixed(2) + 'M';
-    if (n >= 1000) return '$' + Math.round(n).toLocaleString();
     return '$' + Math.round(n).toLocaleString();
   }
 
   function updateROI() {
-    const v = parseInt(slider.value);
-    display.textContent = '$' + v.toLocaleString();
-
+    var v = parseInt(slider.value);
+    if (display) display.textContent = '$' + v.toLocaleString();
     if (currentMode === 30) {
-      /* Simple 30-day estimate */
-      roiLow.textContent = fmt(v * 0.15);
-      roiMid.textContent = fmt(v * 0.30);
-      roiHigh.textContent = fmt(v * 0.50);
-      document.getElementById('tier-low').textContent = 'Conservative';
-      document.getElementById('tier-mid').textContent = 'Moderate';
-      document.getElementById('tier-high').textContent = 'High Performance';
-      document.getElementById('pct-low').textContent = '15% monthly';
-      document.getElementById('pct-mid').textContent = '30% monthly';
-      document.getElementById('pct-high').textContent = '50% monthly';
+      if (roiLow) roiLow.textContent = fmt(v * 0.15);
+      if (roiMid) roiMid.textContent = fmt(v * 0.30);
+      if (roiHigh) roiHigh.textContent = fmt(v * 0.50);
+      var tl = document.getElementById('tier-low');
+      var tm = document.getElementById('tier-mid');
+      var th = document.getElementById('tier-high');
+      var pl = document.getElementById('pct-low');
+      var pm = document.getElementById('pct-mid');
+      var ph = document.getElementById('pct-high');
+      if (tl) tl.textContent = 'Entry Level';
+      if (tm) tm.textContent = 'Growth Level';
+      if (th) th.textContent = 'Advanced Level';
+      if (pl) pl.textContent = '15% monthly · Min $350';
+      if (pm) pm.textContent = '30% monthly · Rec. $700';
+      if (ph) ph.textContent = '50% monthly · Rec. $2,000+';
     } else {
-      /* 6-month compounding at low / mid / high */
-      const low6 = compound(v, 0.15, 6);
-      const mid6 = compound(v, 0.30, 6);
-      const high6 = compound(v, 0.50, 6);
-      roiLow.textContent = fmt(low6);
-      roiMid.textContent = fmt(mid6);
-      roiHigh.textContent = fmt(high6);
-      document.getElementById('tier-low').textContent = 'Conservative';
-      document.getElementById('tier-mid').textContent = 'Moderate';
-      document.getElementById('tier-high').textContent = 'High Performance';
-      document.getElementById('pct-low').textContent = '15%/mo × 6 months';
-      document.getElementById('pct-mid').textContent = '30%/mo × 6 months';
-      document.getElementById('pct-high').textContent = '50%/mo × 6 months';
-
-      /* Build month-by-month table at 30% rate */
+      var rates = [0.15, 0.30, 0.50];
+      var elems = [roiLow, roiMid, roiHigh];
+      var tiers = [
+        document.getElementById('tier-low'),
+        document.getElementById('tier-mid'),
+        document.getElementById('tier-high')
+      ];
+      var pcts = [
+        document.getElementById('pct-low'),
+        document.getElementById('pct-mid'),
+        document.getElementById('pct-high')
+      ];
+      var labels = ['Conservative','Moderate','High Performance'];
+      var pctLabels = ['15%/mo × 6 months','30%/mo × 6 months','50%/mo × 6 months'];
+      rates.forEach(function(r, i) {
+        var val = v * Math.pow(1 + r, 6);
+        if (elems[i]) elems[i].textContent = fmt(val);
+        if (tiers[i]) tiers[i].textContent = labels[i];
+        if (pcts[i]) pcts[i].textContent = pctLabels[i];
+      });
+      /* Month-by-month at 30% */
       if (compRows) {
         compRows.innerHTML = '';
-        let bal = v;
-        for (let m = 1; m <= 6; m++) {
-          const gain = bal * 0.30;
+        var bal = v;
+        for (var m = 1; m <= 6; m++) {
+          var gain = bal * 0.30;
           bal = bal + gain;
-          const row = document.createElement('div');
-          row.style.cssText = 'display:flex;justify-content:space-between;' +
-            'align-items:center;padding:10px 14px;border-radius:8px;' +
-            'background:var(--navy3);border:1px solid var(--glass-border);';
+          var row = document.createElement('div');
+          row.style.cssText = 'display:flex;justify-content:space-between;align-items:center;' +
+            'padding:10px 14px;border-radius:8px;background:var(--navy3);' +
+            'border:1px solid var(--glass-border);margin-bottom:6px;';
           row.innerHTML =
-            '<span style="font-family:JetBrains Mono,monospace;font-size:11px;' +
-            'color:var(--muted);letter-spacing:0.08em;">MONTH ' + m + '</span>' +
-            '<span style="font-family:JetBrains Mono,monospace;font-size:12px;' +
-            'color:#22c55e;">+' + fmt(gain) + ' profit</span>' +
-            '<span style="font-family:Bebas Neue,sans-serif;font-size:20px;' +
-            'color:var(--gold);">' + fmt(bal) + '</span>';
+            '<span style="font-family:JetBrains Mono,monospace;font-size:11px;color:var(--muted);">MONTH ' + m + '</span>' +
+            '<span style="font-family:JetBrains Mono,monospace;font-size:12px;color:#22c55e;">+' + fmt(gain) + '</span>' +
+            '<span style="font-family:Bebas Neue,sans-serif;font-size:20px;color:var(--gold);">' + fmt(bal) + '</span>';
           compRows.appendChild(row);
         }
-        /* Final aha moment */
-        const aha = document.createElement('div');
+        var aha = document.createElement('div');
         aha.style.cssText = 'text-align:center;margin-top:12px;padding:14px;' +
           'background:var(--glass);border:1px solid var(--gold);border-radius:10px;';
         aha.innerHTML =
-          '<span style="font-family:Bebas Neue,sans-serif;font-size:14px;' +
-          'color:var(--muted);letter-spacing:0.1em;">YOUR STARTING CAPITAL: ' + fmt(v) + '</span>' +
-          '<br/>' +
-          '<span style="font-family:Bebas Neue,sans-serif;font-size:28px;' +
-          'color:var(--gold);">After 6 months: ' + fmt(bal) + '</span>' +
-          '<br/>' +
-          '<span style="font-size:12px;color:var(--muted);">Without touching your capital once.</span>';
+          '<div style="font-family:JetBrains Mono,monospace;font-size:10px;color:var(--muted);' +
+          'letter-spacing:0.1em;margin-bottom:6px;">STARTING CAPITAL: ' + fmt(v) + '</div>' +
+          '<div style="font-family:Bebas Neue,sans-serif;font-size:28px;color:var(--gold);">' +
+          'After 6 months: ' + fmt(bal) + '</div>' +
+          '<div style="font-size:12px;color:var(--muted);margin-top:4px;">' +
+          'Without touching your capital once.</div>';
         compRows.appendChild(aha);
       }
     }
@@ -2334,55 +2433,9 @@ document.querySelectorAll('[data-target]').forEach(el => counterObs.observe(el))
   updateROI();
 })();
 
-/* ─── TERMINAL FEED ───────────────────────────── */
-const terminalLines = [
-  { time: '04:12:33', action: 'Scanning XAU/USD...', type: 'scan' },
-  { time: '04:12:51', action: 'Pattern identified — bullish momentum', type: 'scan' },
-  { time: '04:13:02', action: 'XAUUSD BUY 10.00 @ 4,709.47', type: 'action' },
-  { time: '04:29:18', action: 'XAUUSD CLOSED — Target reached', type: 'action' },
-  { time: '04:29:18', action: '+$5,530.00 profit logged', type: 'profit' },
-  { time: '07:45:00', action: 'Scanning EUR/USD...', type: 'scan' },
-  { time: '07:45:14', action: 'EURUSD SELL 24.97 @ 1.14850', type: 'action' },
-  { time: '07:58:41', action: 'EURUSD CLOSED @ 1.14840', type: 'action' },
-  { time: '07:58:41', action: '+$249.70 profit logged', type: 'profit' },
-  { time: '09:02:15', action: 'Scanning GBP/USD...', type: 'scan' },
-  { time: '09:02:30', action: 'Risk management check — OK', type: 'scan' },
-  { time: '09:03:00', action: 'GBPUSD SELL 24.97 @ 1.32301', type: 'action' },
-  { time: '09:05:12', action: 'GBPUSD CLOSED @ 1.32279', type: 'action' },
-  { time: '09:05:12', action: '+$549.34 profit logged', type: 'profit' },
-];
-
-const feed = document.getElementById('terminal-feed');
-if (feed) {
-  let idx = 0;
-  function addLine() {
-    if (idx >= terminalLines.length) idx = 0;
-    const l = terminalLines[idx];
-    const div = document.createElement('div');
-    div.className = 't-line';
-    const cls = l.type === 'profit' ? 't-profit' : l.type === 'scan' ? 't-scan' : 't-action';
-    div.innerHTML = `<span class="t-time">[${l.time}]</span><span class="${cls}">${l.action}</span>`;
-    feed.appendChild(div);
-    feed.scrollTop = feed.scrollHeight;
-    if (feed.children.length > 12) feed.removeChild(feed.firstChild);
-    idx++;
-  }
-
-  const cursor = document.createElement('div');
-  cursor.className = 't-line';
-  cursor.innerHTML = '<span class="t-time">[live]</span><span class="t-scan">Phantom AI core running <span class="t-cursor"></span></span>';
-  feed.appendChild(cursor);
-
-  let termInView = false;
-  new IntersectionObserver(([e]) => { termInView = e.isIntersecting; }, { threshold: 0.3 })
-    .observe(feed);
-
-  setInterval(() => { if (termInView) addLine(); }, 1800);
-}
-
 /* ─── LIVE TICKER ─────────────────────────────── */
 (function() {
-  const trades = [
+  var trades = [
     { pair:'XAUUSD', ai:'Neuron', profit:'+$8,310', loc:'United Kingdom' },
     { pair:'XAUUSD', ai:'Reaper', profit:'+$10,430', loc:'Sweden' },
     { pair:'EURUSD', ai:'Viper', profit:'+$249', loc:'Canada' },
@@ -2396,29 +2449,27 @@ if (feed) {
     { pair:'XAUUSD', ai:'Reaper', profit:'+$5,530', loc:'Sweden' },
     { pair:'USDJPY', ai:'UJ', profit:'+$89', loc:'United Kingdom' },
   ];
-  const track = document.getElementById('ticker-track');
+  var track = document.getElementById('ticker-track');
   if (!track) return;
-  const allTrades = [...trades, ...trades]; /* duplicate for seamless loop */
-  allTrades.forEach(t => {
-    const item = document.createElement('div');
+  var all = trades.concat(trades);
+  all.forEach(function(t) {
+    var item = document.createElement('div');
     item.className = 'ticker-item';
-    item.innerHTML =
-      '<span class="pair">' + t.pair + '</span>' +
+    item.innerHTML = '<span class="pair">' + t.pair + '</span>' +
       '<span class="profit">' + t.profit + '</span>' +
       '<span>· ' + t.ai + ' · ' + t.loc + '</span>';
     track.appendChild(item);
   });
 })();
 
-/* ─── FLOATING PROFIT POPUPS ───────────────────── */
+/* ─── PROFIT POPUPS ───────────────────────────── */
 (function() {
-  const popup = document.getElementById('profit-popup');
-  const amount = document.getElementById('pp-amount');
-  const label = document.getElementById('pp-label');
-  const sub = document.getElementById('pp-sub');
+  var popup = document.getElementById('profit-popup');
+  var amount = document.getElementById('pp-amount');
+  var label = document.getElementById('pp-label');
+  var sub = document.getElementById('pp-sub');
   if (!popup) return;
-
-  const events = [
+  var events = [
     { amt:'+$8,310', lbl:'XAUUSD · PHANTOM AI NEURON', loc:'Member from UK' },
     { amt:'+$549', lbl:'GBPUSD · PHANTOM AI VIPER', loc:'Member from Australia' },
     { amt:'+$3,260', lbl:'XAUUSD · PHANTOM AI REAPER', loc:'Member from Sweden' },
@@ -2428,20 +2479,82 @@ if (feed) {
     { amt:'+$2,504', lbl:'XAUUSD · PHANTOM AI NEURON', loc:'Member from Ireland' },
     { amt:'+$387', lbl:'EURUSD · PHANTOM AI VIPER', loc:'Member from Germany' },
   ];
-  let idx = 0;
-
+  var idx = 0;
   function showPopup() {
-    const e = events[idx % events.length];
-    amount.textContent = e.amt;
-    label.textContent = e.lbl;
-    sub.textContent = e.loc + ' just generated this';
+    var e = events[idx % events.length];
+    if (amount) amount.textContent = e.amt;
+    if (label) label.textContent = e.lbl;
+    if (sub) sub.textContent = e.loc + ' just generated this';
     popup.classList.add('show');
-    setTimeout(() => popup.classList.remove('show'), 5000);
+    setTimeout(function() { popup.classList.remove('show'); }, 5000);
     idx++;
   }
+  setTimeout(function() { showPopup(); setInterval(showPopup, 28000); }, 8000);
+})();
 
-  /* First popup after 8s, then every 28s */
-  setTimeout(() => { showPopup(); setInterval(showPopup, 28000); }, 8000);
+/* ─── TERMINAL FEED ───────────────────────────── */
+(function() {
+  var terminalLines = [
+    { time:'04:12:33', action:'Scanning XAU/USD...', type:'scan' },
+    { time:'04:12:51', action:'Pattern identified — bullish momentum', type:'scan' },
+    { time:'04:13:02', action:'XAUUSD BUY 10.00 @ 4,709.47', type:'action' },
+    { time:'04:29:18', action:'XAUUSD CLOSED — Target reached', type:'action' },
+    { time:'04:29:18', action:'+$5,530.00 profit logged', type:'profit' },
+    { time:'07:45:00', action:'Scanning EUR/USD...', type:'scan' },
+    { time:'07:45:14', action:'EURUSD SELL 24.97 @ 1.14850', type:'action' },
+    { time:'07:58:41', action:'EURUSD CLOSED @ 1.14840', type:'action' },
+    { time:'07:58:41', action:'+$249.70 profit logged', type:'profit' },
+    { time:'09:02:15', action:'Scanning GBP/USD...', type:'scan' },
+    { time:'09:02:30', action:'Risk management check — OK', type:'scan' },
+    { time:'09:03:00', action:'GBPUSD SELL 24.97 @ 1.32301', type:'action' },
+    { time:'09:05:12', action:'GBPUSD CLOSED @ 1.32279', type:'action' },
+    { time:'09:05:12', action:'+$549.34 profit logged', type:'profit' },
+  ];
+  var feed = document.getElementById('terminal-feed');
+  if (!feed) return;
+  var cursor = document.createElement('div');
+  cursor.className = 't-line';
+  cursor.innerHTML = '<span class="t-time">[live]</span>' +
+    '<span class="t-scan">Phantom AI core running <span class="t-cursor"></span></span>';
+  feed.appendChild(cursor);
+  var idx = 0;
+  var termInView = false;
+  new IntersectionObserver(function(entries) {
+    termInView = entries[0].isIntersecting;
+  }, { threshold: 0.3 }).observe(feed);
+  function addLine() {
+    if (idx >= terminalLines.length) idx = 0;
+    var l = terminalLines[idx];
+    var div = document.createElement('div');
+    div.className = 't-line';
+    var cls = l.type === 'profit' ? 't-profit' : l.type === 'scan' ? 't-scan' : 't-action';
+    div.innerHTML = '<span class="t-time">[' + l.time + ']</span>' +
+      '<span class="' + cls + '">' + l.action + '</span>';
+    feed.insertBefore(div, cursor);
+    if (feed.children.length > 13) feed.removeChild(feed.firstChild);
+    idx++;
+  }
+  setInterval(function() { if (termInView) addLine(); }, 1800);
+})();
+
+/* ─── TRUSTPILOT GALLERY AUTO-SCROLL ─────────── */
+(function() {
+  var g = document.getElementById('tp-gallery');
+  if (!g) return;
+  var paused = false;
+  g.addEventListener('mouseenter', function() { paused = true; });
+  g.addEventListener('mouseleave', function() { paused = false; });
+  g.addEventListener('touchstart', function() { paused = true; }, { passive: true });
+  g.addEventListener('touchend', function() { setTimeout(function() { paused = false; }, 3000); }, { passive: true });
+  setInterval(function() {
+    if (!paused) {
+      if (g.scrollLeft + g.clientWidth >= g.scrollWidth - 20) {
+        g.scrollTo({ left: 0, behavior: 'smooth' });
+      } else {
+        g.scrollBy({ left: 270, behavior: 'smooth' });
+      }
+    }
+  }, 3200);
 })();
 
 /* ─── FLOATING CTA ────────────────────────────── */
