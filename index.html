@@ -1287,6 +1287,7 @@
 <!-- ═══ FLOATING CTA ═══ -->
 <a href="https://t.me/phatomaifree"
    id="floating-cta"
+   data-tg-btn="true"
    class="floating-cta"
    onclick="trackLead('floating_cta')">
   <span class="floating-btn">
@@ -1368,6 +1369,7 @@
 
       <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:center;">
         <a href="https://t.me/phatomaifree"
+           id="tg-btn-hero"
            class="btn-primary"
            onclick="trackLead('hero_cta')">
           <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
@@ -2278,6 +2280,7 @@
 
           <!-- Direct join button -->
           <a href="https://t.me/phatomaifree"
+             id="tg-btn-webinar"
              onclick="trackLead('webinar_cta')"
              style="
                display:flex; align-items:center; justify-content:center;
@@ -2348,6 +2351,7 @@
       </div>
 
       <a href="https://t.me/phatomaifree"
+         id="tg-btn-final"
          class="btn-primary"
          style="font-size:22px; padding:20px 44px;"
          onclick="trackLead('final_cta')">
@@ -2382,10 +2386,15 @@
      JAVASCRIPT
 ═══════════════════════════════════════════ -->
 <script>
-/* ─── UTM CAPTURE ──────────────────────────────── */
+/* ─── UTM CAPTURE + DYNAMIC TELEGRAM LINKS ──────── */
 (function() {
-  const p = new URLSearchParams(window.location.search);
-  ['utm_source','utm_medium','utm_campaign','utm_content','utm_term'].forEach(k => {
+  var p = new URLSearchParams(window.location.search);
+  var src = p.get('utm_source') || localStorage.getItem('utm_source') || 'organic';
+  var med = p.get('utm_medium') || localStorage.getItem('utm_medium') || 'unknown';
+  var cam = p.get('utm_campaign') || 'none';
+
+  /* Store UTMs */
+  ['utm_source','utm_medium','utm_campaign','utm_content','utm_term'].forEach(function(k) {
     if (p.get(k)) {
       localStorage.setItem(k, p.get(k));
       sessionStorage.setItem(k, p.get(k));
@@ -2393,21 +2402,45 @@
   });
 
   /* Send UTM to Make.com webhook */
-  const utmData = {
-    utm_source: p.get('utm_source') || localStorage.getItem('utm_source') || 'direct',
-    utm_medium: p.get('utm_medium') || localStorage.getItem('utm_medium') || 'unknown',
-    utm_campaign: p.get('utm_campaign') || 'none',
+  var utmData = {
+    utm_source: src,
+    utm_medium: med,
+    utm_campaign: cam,
+    event: 'page_view',
     timestamp: new Date().toISOString(),
     page: window.location.href,
     referrer: document.referrer || 'none'
   };
-
-  /* REPLACE with your Make.com webhook URL */
   fetch('https://hook.eu1.make.com/lxmcf95pqifaqu91px2qkovw2ovmxwfq', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(utmData)
-  }).catch(() => {});
+  }).catch(function(){});
+
+  /* Update ALL Telegram CTA buttons to use bot ?start= parameter
+     so Make.com knows exactly which platform sent this lead */
+  var BOT_BASE = 'https://t.me/Zee_PhantomAI_Bot?start=';
+  var startParam = src; /* e.g. meta, tiktok, whatsapp, organic */
+
+  /* Run after DOM is ready */
+  function updateTgLinks() {
+    /* All buttons with t.me links */
+    var allLinks = document.querySelectorAll('a[href*="t.me/phatomaifree"]');
+    allLinks.forEach(function(el) {
+      el.href = BOT_BASE + startParam;
+    });
+    /* Also update floating CTA */
+    var floatBtn = document.querySelector('.floating-btn');
+    if (floatBtn && floatBtn.parentElement) {
+      floatBtn.parentElement.href = BOT_BASE + startParam;
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', updateTgLinks);
+  } else {
+    updateTgLinks();
+  }
 })();
 
 /* ─── TRACK LEAD (Meta Pixel + log) ──────────── */
