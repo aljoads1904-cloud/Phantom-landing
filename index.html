@@ -2438,7 +2438,7 @@ src="https://www.facebook.com/tr?id=913494595004072&ev=PageView&noscript=1"
 
   /* Update ALL Telegram CTA buttons to use bot ?start= parameter
      so Make.com knows exactly which platform sent this lead */
-  var BOT_BASE = 'https://t.me/Zee_PhantomAI_Bot?start=';
+  var BOT_BASE = 'https://t.me/phatomaifree';
   var startParam = src; /* e.g. meta, tiktok, whatsapp, organic */
 
   /* Run after DOM is ready */
@@ -2446,12 +2446,12 @@ src="https://www.facebook.com/tr?id=913494595004072&ev=PageView&noscript=1"
     /* All buttons with t.me links */
     var allLinks = document.querySelectorAll('a[href*="t.me/phatomaifree"]');
     allLinks.forEach(function(el) {
-      el.href = BOT_BASE + startParam;
+      el.href = BOT_BASE;
     });
     /* Also update floating CTA */
     var floatBtn = document.querySelector('.floating-btn');
     if (floatBtn && floatBtn.parentElement) {
-      floatBtn.parentElement.href = BOT_BASE + startParam;
+      floatBtn.parentElement.href = BOT_BASE;
     }
   }
 
