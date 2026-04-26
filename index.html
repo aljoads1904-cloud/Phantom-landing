@@ -1304,7 +1304,7 @@ src="https://www.facebook.com/tr?id=913494595004072&ev=PageView&noscript=1"
 </div>
 
 <!-- ═══ FLOATING CTA ═══ -->
-<a href="https://t.me/phantomairesources"
+<a href="https://t.me/Zee_PhantomAI_Bot"
    id="floating-cta"
    data-tg-btn="true"
    class="floating-cta"
@@ -1387,7 +1387,7 @@ src="https://www.facebook.com/tr?id=913494595004072&ev=PageView&noscript=1"
       </div>
 
       <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:center;">
-        <a href="https://t.me/phantomairesources"
+        <a href="https://t.me/Zee_PhantomAI_Bot"
            id="tg-btn-hero"
            class="btn-primary"
            onclick="trackLead('hero_cta')">
@@ -2298,7 +2298,7 @@ src="https://www.facebook.com/tr?id=913494595004072&ev=PageView&noscript=1"
           ">Secure · Regulated · FX Giants</p>
 
           <!-- Direct join button -->
-          <a href="https://t.me/phantomairesources"
+          <a href="https://t.me/Zee_PhantomAI_Bot"
              id="tg-btn-webinar"
              onclick="trackLead('webinar_cta')"
              style="
@@ -2369,7 +2369,7 @@ src="https://www.facebook.com/tr?id=913494595004072&ev=PageView&noscript=1"
         </div>
       </div>
 
-      <a href="https://t.me/phantomairesources"
+      <a href="https://t.me/Zee_PhantomAI_Bot"
          id="tg-btn-final"
          class="btn-primary"
          style="font-size:22px; padding:20px 44px;"
@@ -2438,20 +2438,20 @@ src="https://www.facebook.com/tr?id=913494595004072&ev=PageView&noscript=1"
 
   /* Update ALL Telegram CTA buttons to use bot ?start= parameter
      so Make.com knows exactly which platform sent this lead */
-  var BOT_BASE = 'https://t.me/phantomairesources';
+  var BOT_BASE = 'https://t.me/Zee_PhantomAI_Bot?start=';
   var startParam = src; /* e.g. meta, tiktok, whatsapp, organic */
 
   /* Run after DOM is ready */
   function updateTgLinks() {
-    /* All buttons with t.me links */
-    var allLinks = document.querySelectorAll('a[href*="t.me/phatomaifree"]');
+    /* All buttons with Telegram bot links */
+    var allLinks = document.querySelectorAll('a[href*="t.me/Zee_PhantomAI_Bot"]');
     allLinks.forEach(function(el) {
-      el.href = BOT_BASE;
+      el.href = BOT_BASE + (startParam || 'direct');
     });
     /* Also update floating CTA */
     var floatBtn = document.querySelector('.floating-btn');
     if (floatBtn && floatBtn.parentElement) {
-      floatBtn.parentElement.href = BOT_BASE;
+      floatBtn.parentElement.href = BOT_BASE + (startParam || 'direct');
     }
   }
 
